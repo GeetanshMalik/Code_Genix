@@ -1669,57 +1669,530 @@ input:checked+.slider-small:before {
     margin-right: 0.5rem;
 }
 
-/* Responsive Design */
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - Tablet & Mobile
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ---------- Tablet (≤1024px) ---------- */
 @media (max-width: 1024px) {
     .main-container {
         flex-direction: column;
+        overflow-y: auto;
+        height: calc(100vh - 55px);
     }
 
     .left-panel {
         width: 100%;
-        height: 50%;
+        height: 45vh;
+        min-height: 280px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .right-panel {
         width: 100%;
-        height: 50%;
-        flex-direction: row;
+        height: auto;
+        min-height: 45vh;
+        flex-direction: column;
     }
 
     .youtube-section {
-        width: 50%;
-        height: 100%;
-        border-right: 1px solid var(--border-color);
-        border-bottom: none;
+        width: 100%;
+        height: 250px;
+        min-height: 200px;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .io-section {
-        width: 50%;
-        height: 100%;
+        width: 100%;
+        height: 250px;
+        min-height: 200px;
     }
 
     .ai-panel {
         width: 350px;
         height: 500px;
     }
+
+    .nav-btn {
+        padding: 0.5rem 0.8rem;
+    }
+
+    #youtubeSearch {
+        width: 160px;
+    }
 }
 
+/* ---------- Small Tablet / Large Phone (≤768px) ---------- */
 @media (max-width: 768px) {
-    .nav-center {
+    /* --- Navbar --- */
+    .navbar {
+        padding: 0.25rem 0.5rem;
+        height: 50px;
         gap: 0.25rem;
+    }
+
+    .logo span {
+        display: none;
+    }
+
+    .logo i {
+        font-size: 1.2rem;
+    }
+
+    .nav-center {
+        gap: 0.15rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .nav-center::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
     }
 
     .nav-btn span {
         display: none;
     }
 
-    .ai-panel {
-        width: 300px;
-        height: 450px;
+    .nav-right {
+        gap: 0.4rem;
+    }
+
+    #languageSelect {
+        min-width: 80px;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .switch {
+        width: 60px;
+        height: 28px;
+        border-radius: 15px;
+    }
+
+    .slider:before {
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(32px);
+    }
+
+    .star, .cloud, .black-cloud {
+        display: none;
+    }
+
+    /* --- Main Layout --- */
+    body {
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .main-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 50px);
+        overflow-y: auto;
+    }
+
+    .left-panel {
+        width: 100%;
+        height: 50vh;
+        min-height: 250px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .right-panel {
+        width: 100%;
+        height: auto;
+        flex-direction: column;
+    }
+
+    /* --- Editor --- */
+    .editor-header {
+        padding: 0.25rem 0.5rem;
+        height: 42px;
+    }
+
+    .file-tabs-belt {
+        max-width: calc(100% - 36px);
+    }
+
+    .belt-nav-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+    }
+
+    .tab {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+        min-width: 60px;
+    }
+
+    .tab-name {
+        max-width: 80px;
+    }
+
+    .add-file-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+
+    .editor-controls .nav-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .CodeMirror {
+        font-size: 13px !important;
+    }
+
+    /* --- YouTube Section --- */
+    .youtube-section {
+        width: 100%;
+        height: 220px;
+        min-height: 180px;
+    }
+
+    .youtube-header {
+        padding: 0.4rem 0.5rem;
+        height: 40px;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .youtube-header h3 {
+        font-size: 0.85rem;
+    }
+
+    .youtube-controls {
+        flex: 1;
+        min-width: 0;
     }
 
     #youtubeSearch {
-        width: 150px;
+        width: 100%;
+        min-width: 80px;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.5rem;
+    }
+
+    .youtube-container {
+        padding: 0.25rem;
+    }
+
+    /* --- IO Section --- */
+    .io-section {
+        width: 100%;
+        height: 220px;
+        min-height: 200px;
+    }
+
+    .io-header {
+        padding: 0.4rem 0.5rem;
+        height: 40px;
+    }
+
+    .io-tab {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .io-tab i {
+        display: none;
+    }
+
+    .io-controls .nav-btn {
+        padding: 0.3rem 0.5rem;
+    }
+
+    #outputContent {
+        font-size: 13px;
+        padding: 0.5rem;
+    }
+
+    #inputArea {
+        font-size: 13px;
+        padding: 0.5rem;
+    }
+
+    #consoleContent {
+        font-size: 13px;
+        padding: 0.5rem;
+    }
+
+    .console-input {
+        padding: 0.4rem 0.5rem;
+    }
+
+    #consoleInput {
+        font-size: 13px;
+    }
+
+    /* --- AI Panel --- */
+    .ai-toggle {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .ai-assistant {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .ai-panel {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        height: 70vh;
+        max-height: none;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+    }
+
+    .ai-message {
+        max-width: 90%;
+        font-size: 0.85rem;
+    }
+
+    .ai-input-field {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .ai-send-btn {
+        padding: 0.6rem 1rem;
+    }
+
+    .ai-quick-actions {
+        gap: 0.25rem;
+    }
+
+    .ai-action-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.65rem;
+    }
+
+    /* --- Modals --- */
+    .modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    .settings-modal {
+        width: 95%;
+        max-width: none;
+    }
+
+    /* --- Find & Replace --- */
+    .find-replace-modal {
+        min-width: auto;
+        width: 95%;
+        max-width: none;
+        top: 55px;
+        right: 2.5%;
+        left: 2.5%;
+    }
+
+    .find-replace-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .find-replace-row label {
+        min-width: auto;
+    }
+
+    .find-actions .nav-btn {
+        min-width: 80px;
+        font-size: 0.75rem;
+    }
+
+    /* --- Video Grid --- */
+    .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    /* --- Scrollbars thinner on mobile --- */
+    .CodeMirror-vscrollbar {
+        width: 8px !important;
+    }
+
+    .CodeMirror-vscrollbar>div {
+        border-width: 1px !important;
+    }
+
+    #outputContent::-webkit-scrollbar,
+    #consoleContent::-webkit-scrollbar,
+    #inputArea::-webkit-scrollbar,
+    .ai-chat-display::-webkit-scrollbar {
+        width: 6px;
+    }
+}
+
+/* ---------- Phone (≤480px) ---------- */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.2rem 0.4rem;
+        height: 44px;
+    }
+
+    .nav-center {
+        gap: 0.1rem;
+    }
+
+    .nav-btn {
+        padding: 0.35rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .nav-right {
+        gap: 0.25rem;
+    }
+
+    #languageSelect {
+        min-width: 65px;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.35rem;
+    }
+
+    .switch {
+        width: 48px;
+        height: 24px;
+    }
+
+    .slider:before {
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+    }
+
+    .main-container {
+        height: auto;
+        min-height: calc(100vh - 44px);
+    }
+
+    .left-panel {
+        height: 45vh;
+        min-height: 220px;
+    }
+
+    .youtube-section {
+        height: 200px;
+        min-height: 160px;
+    }
+
+    .io-section {
+        height: 200px;
+        min-height: 180px;
+    }
+
+    .editor-header {
+        padding: 0.2rem 0.4rem;
+        height: 38px;
+    }
+
+    .tab {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        min-width: 50px;
+    }
+
+    .tab-name {
+        max-width: 60px;
+    }
+
+    .CodeMirror {
+        font-size: 12px !important;
+    }
+
+    .youtube-header {
+        height: 36px;
+        padding: 0.3rem 0.4rem;
+    }
+
+    .youtube-header h3 {
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .io-header {
+        height: 36px;
+    }
+
+    .io-tab {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .ai-panel {
+        height: 80vh;
+    }
+
+    .ai-panel-header h2 {
+        font-size: 0.9rem;
+    }
+
+    .ai-message {
+        font-size: 0.8rem;
+    }
+
+    .modal-content {
+        width: 98%;
+        border-radius: 8px;
+    }
+
+    .settings-tab {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .settings-tab i {
+        display: none;
+    }
+
+    .find-replace-modal {
+        width: 98%;
+        right: 1%;
+        left: 1%;
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .output-placeholder i {
+        font-size: 2rem;
+    }
+
+    .output-placeholder p {
+        font-size: 0.85rem;
     }
 }
 

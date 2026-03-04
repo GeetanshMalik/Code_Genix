@@ -2,14 +2,14 @@
 
 A powerful web-based IDE with multi-language compilation, AI coding assistant, integrated YouTube tutorials, and a real terminal — all in one interface.
 
-> **Try it live:** [CodeGenix on Heroku](#) *(link after deployment)*
+> **Try it live:** [codegenix.live](https://codegenix.live)
 
 ---
 
 ## ✨ Features
 
-### 🌐 15+ Language Support
-Python • JavaScript • Java • C++ • C • PHP • Go • Rust • Ruby • TypeScript • Kotlin • Swift • HTML • CSS • SQL
+### 🌐 10 Language Support
+Python • JavaScript • Java • C++ • C • PHP • Go • Rust • HTML • CSS
 
 All languages compile and execute server-side via Docker with real compilers (GCC, JDK, Node.js, etc.).
 
@@ -54,8 +54,8 @@ All languages compile and execute server-side via Docker with real compilers (GC
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/ai-python-interpreter.git
-cd ai-python-interpreter
+git clone https://github.com/GeetanshMalik/Code_Genix.git
+cd Code_Genix
 
 # Install dependencies
 pip install -r requirements.txt
@@ -146,28 +146,12 @@ The Dockerfile installs all compilers so every language works out of the box:
 |------------------|------------------|---------|
 | Python           | python3          | 3.10+   |
 | JavaScript       | Node.js          | 12+     |
-| TypeScript       | tsc (npm)        | Latest  |
 | Java             | OpenJDK          | 11+     |
 | C / C++          | GCC / G++        | 11+     |
 | PHP              | php              | 8+      |
 | Go               | golang           | 1.18+   |
 | Rust             | rustc            | 1.60+   |
-| Ruby             | ruby             | 3+      |
-| SQL              | SQLite3          | 3+      |
-
----
-
-## 🔍 SEO & Discovery
-
-CodeGenix is discoverable by language-specific searches. URLs with language parameters pre-select the compiler:
-
-```
-https://your-app.com/?lang=python   → Python pre-selected
-https://your-app.com/?lang=c        → C pre-selected  
-https://your-app.com/?lang=java     → Java pre-selected
-```
-
-Default landing language: **Python**
+| HTML / CSS       | Browser preview  | —       |
 
 ---
 
