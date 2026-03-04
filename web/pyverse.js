@@ -9,6 +9,11 @@ let aiMinimized = false;
 let autopilotEnabled = false;
 let isTyping = false;
 
+// Interactive execution state
+let currentRunId = null;
+let pollInterval = null;
+let isRunning = false;
+
 // File management variables
 let files = [];
 let currentFileId = 0;
@@ -1191,8 +1196,13 @@ function changeLanguage() {
     }
 }
 
-// Code execution
+// Code execution — Interactive mode with line-by-line input
 async function runCode() {
+    // Stop any previous run
+    if (isRunning && currentRunId) {
+        await stopRunning();
+    }
+
     // Save current file content
     if (currentFileId !== null) {
         const currentFile = files.find(f => f.id === currentFileId);
@@ -1220,39 +1230,190 @@ async function runCode() {
         return;
     }
 
-    showOutput('>>> Compiling and executing...\n', true);
+    // Switch to output tab
+    switchIOTabDirect('output');
+    showOutput('>>> Starting interactive execution...\n', true);
 
     try {
-        const input = document.getElementById('inputArea').value;
-
-        const response = await fetch(`/api/compile/${currentLanguage}`, {
+        // Start the interactive process
+        const response = await fetch('/api/run/start', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                code: code,
-                input: input,
-                language: currentLanguage,
-                files: files // Send all files for languages that might need them
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, language: currentLanguage })
         });
 
         const result = await response.json();
 
-        if (result.success) {
-            showOutput(result.output || '(No output)', false);
-            if (result.error) {
-                showOutput('\n--- Warnings ---\n' + result.error, false);
-            }
-        } else {
+        if (!result.success) {
             showOutput('Error: ' + result.error, false);
-            // Trigger AI assistance for error
-            getAIErrorHelp(result.error);
+            return;
         }
+
+        currentRunId = result.run_id;
+        isRunning = true;
+
+        // Start polling for output
+        startOutputPolling();
+
     } catch (error) {
         showOutput('Connection Error: ' + error.message + '\n\nMake sure the backend server is running.', false);
     }
+}
+
+function switchIOTabDirect(tab) {
+    document.querySelectorAll('.io-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.io-panel').forEach(p => p.classList.remove('active'));
+    // Find the tab button by text content
+    document.querySelectorAll('.io-tab').forEach(t => {
+        if (t.textContent.trim().toLowerCase().includes(tab)) t.classList.add('active');
+    });
+    const panel = document.getElementById(tab + 'Panel');
+    if (panel) panel.classList.add('active');
+}
+
+function startOutputPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+
+    pollInterval = setInterval(async () => {
+        if (!currentRunId || !isRunning) {
+            clearInterval(pollInterval);
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/run/${currentRunId}/output`);
+            const data = await response.json();
+
+            if (!data.success) {
+                clearInterval(pollInterval);
+                isRunning = false;
+                return;
+            }
+
+            // Append any new output
+            if (data.output) {
+                appendOutput(data.output);
+            }
+            if (data.error) {
+                appendOutput(data.error, true);
+            }
+
+            // Handle status
+            if (data.status === 'waiting_for_input') {
+                showInlineInput();
+            } else if (data.status === 'done') {
+                clearInterval(pollInterval);
+                isRunning = false;
+                currentRunId = null;
+                removeInlineInput();
+                appendOutput('\n>>> Program finished.\n');
+            }
+            // 'running' — just keep polling
+
+        } catch (err) {
+            console.error('Polling error:', err);
+        }
+    }, 300);
+}
+
+async function stopRunning() {
+    if (currentRunId) {
+        try {
+            await fetch(`/api/run/${currentRunId}/stop`, { method: 'POST' });
+        } catch (e) { }
+    }
+    if (pollInterval) clearInterval(pollInterval);
+    isRunning = false;
+    currentRunId = null;
+    removeInlineInput();
+}
+
+function appendOutput(text, isError = false) {
+    const outputContent = document.getElementById('outputContent');
+    const placeholder = outputContent.querySelector('.output-placeholder');
+    if (placeholder) placeholder.remove();
+
+    // Remove inline input temporarily to append text before it
+    const existingInput = outputContent.querySelector('.inline-input-container');
+    if (existingInput) existingInput.remove();
+
+    const span = document.createElement('span');
+    span.textContent = text;
+    span.style.whiteSpace = 'pre-wrap';
+    if (isError) span.style.color = '#ef4444';
+    outputContent.appendChild(span);
+
+    // Re-add inline input if it was there
+    if (existingInput) outputContent.appendChild(existingInput);
+
+    outputContent.scrollTop = outputContent.scrollHeight;
+}
+
+function showInlineInput() {
+    const outputContent = document.getElementById('outputContent');
+
+    // Don't add if already exists
+    if (outputContent.querySelector('.inline-input-container')) return;
+
+    const container = document.createElement('div');
+    container.className = 'inline-input-container';
+    container.style.cssText = 'display:flex;align-items:center;margin-top:4px;gap:6px;';
+
+    const prompt = document.createElement('span');
+    prompt.textContent = '> ';
+    prompt.style.cssText = 'color:var(--accent-color);font-family:monospace;font-weight:bold;';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-run-input';
+    input.placeholder = 'Type your input and press Enter...';
+    input.style.cssText = `
+        flex:1; padding:6px 10px; background:var(--tertiary-bg); border:1px solid var(--accent-color);
+        border-radius:6px; color:var(--text-primary); font-family:'Fira Code','Consolas',monospace;
+        font-size:13px; outline:none;
+    `;
+
+    input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const value = input.value;
+
+            // Show what user typed
+            const echo = document.createElement('span');
+            echo.textContent = value + '\n';
+            echo.style.cssText = 'color:var(--success-color);white-space:pre-wrap;';
+
+            // Replace input container with the echoed text
+            container.replaceWith(echo);
+
+            // Send to backend
+            if (currentRunId) {
+                try {
+                    await fetch(`/api/run/${currentRunId}/input`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ input: value })
+                    });
+                } catch (err) {
+                    appendOutput('\n[Error sending input]\n', true);
+                }
+            }
+        }
+    });
+
+    container.appendChild(prompt);
+    container.appendChild(input);
+    outputContent.appendChild(container);
+    outputContent.scrollTop = outputContent.scrollHeight;
+
+    // Auto-focus the input
+    setTimeout(() => input.focus(), 50);
+}
+
+function removeInlineInput() {
+    const outputContent = document.getElementById('outputContent');
+    const existing = outputContent.querySelector('.inline-input-container');
+    if (existing) existing.remove();
 }
 
 function findMainFile() {

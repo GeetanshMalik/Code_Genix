@@ -6,6 +6,13 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sys
 import os
+import subprocess
+import tempfile
+import threading
+import uuid
+import time
+import queue
+import shutil
 from pathlib import Path
 
 # Add src to path
@@ -16,6 +23,268 @@ from src.compilers.compiler_factory import CompilerFactory
 
 app = Flask(__name__, static_folder='web', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend
+
+# ═══════════════════════════════════════════════════════════════
+# INTERACTIVE PROCESS MANAGER
+# ═══════════════════════════════════════════════════════════════
+
+class ProcessManager:
+    """Manages running interactive processes for code execution"""
+    
+    def __init__(self):
+        self.processes = {}  # run_id -> process info dict
+        self._lock = threading.Lock()
+        # Start cleanup thread
+        cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
+        cleanup_thread.start()
+    
+    def start_process(self, code, language, run_id=None):
+        """Start an interactive process and return run_id"""
+        if run_id is None:
+            run_id = str(uuid.uuid4())[:8]
+        
+        # Create temp file
+        temp_dir = tempfile.mkdtemp()
+        ext_map = {
+            'python': '.py', 'javascript': '.js', 'java': '.java',
+            'cpp': '.cpp', 'c': '.c', 'go': '.go', 'rust': '.rs', 'php': '.php'
+        }
+        ext = ext_map.get(language, '.py')
+        
+        # For Java, class name must be Main
+        filename = 'Main.java' if language == 'java' else f'main{ext}'
+        file_path = os.path.join(temp_dir, filename)
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(code)
+        
+        # Build command based on language
+        cmd = self._get_command(language, file_path, temp_dir)
+        if cmd is None:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return None, f"Language '{language}' not supported for interactive mode"
+        
+        try:
+            # For compiled languages, compile first
+            compile_cmd = self._get_compile_command(language, file_path, temp_dir)
+            if compile_cmd:
+                compile_result = subprocess.run(
+                    compile_cmd, cwd=temp_dir,
+                    capture_output=True, text=True, timeout=30
+                )
+                if compile_result.returncode != 0:
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    return None, f"Compilation Error:\n{compile_result.stderr}"
+            
+            # Start the process
+            process = subprocess.Popen(
+                cmd,
+                cwd=temp_dir,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=0  # Unbuffered
+            )
+            
+            output_queue = queue.Queue()
+            error_queue = queue.Queue()
+            
+            # Reader threads for stdout and stderr
+            def read_stdout():
+                try:
+                    while True:
+                        char = process.stdout.read(1)
+                        if char == '':
+                            break
+                        output_queue.put(char)
+                except:
+                    pass
+            
+            def read_stderr():
+                try:
+                    while True:
+                        char = process.stderr.read(1)
+                        if char == '':
+                            break
+                        error_queue.put(char)
+                except:
+                    pass
+            
+            stdout_thread = threading.Thread(target=read_stdout, daemon=True)
+            stderr_thread = threading.Thread(target=read_stderr, daemon=True)
+            stdout_thread.start()
+            stderr_thread.start()
+            
+            with self._lock:
+                self.processes[run_id] = {
+                    'process': process,
+                    'output_queue': output_queue,
+                    'error_queue': error_queue,
+                    'stdout_thread': stdout_thread,
+                    'stderr_thread': stderr_thread,
+                    'temp_dir': temp_dir,
+                    'started_at': time.time(),
+                    'language': language
+                }
+            
+            return run_id, None
+            
+        except Exception as e:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return None, str(e)
+    
+    def get_output(self, run_id):
+        """Get any new output from the process"""
+        with self._lock:
+            info = self.processes.get(run_id)
+        
+        if info is None:
+            return None, None, 'not_found'
+        
+        process = info['process']
+        output_queue = info['output_queue']
+        error_queue = info['error_queue']
+        
+        # Collect all available output
+        output = ''
+        while not output_queue.empty():
+            try:
+                output += output_queue.get_nowait()
+            except queue.Empty:
+                break
+        
+        error = ''
+        while not error_queue.empty():
+            try:
+                error += error_queue.get_nowait()
+            except queue.Empty:
+                break
+        
+        # Determine status
+        poll = process.poll()
+        if poll is not None:
+            # Process finished — wait a bit for remaining output
+            time.sleep(0.1)
+            while not output_queue.empty():
+                try:
+                    output += output_queue.get_nowait()
+                except queue.Empty:
+                    break
+            while not error_queue.empty():
+                try:
+                    error += error_queue.get_nowait()
+                except queue.Empty:
+                    break
+            status = 'done'
+        elif output == '' and error == '':
+            # No new output — process might be waiting for input
+            # Give it a tiny moment to produce output
+            time.sleep(0.05)
+            if output_queue.empty() and process.poll() is None:
+                status = 'waiting_for_input'
+            else:
+                # More output came
+                while not output_queue.empty():
+                    try:
+                        output += output_queue.get_nowait()
+                    except queue.Empty:
+                        break
+                status = 'running'
+        else:
+            status = 'running'
+        
+        return output, error, status
+    
+    def send_input(self, run_id, user_input):
+        """Send input to the process stdin"""
+        with self._lock:
+            info = self.processes.get(run_id)
+        
+        if info is None:
+            return False, 'Process not found'
+        
+        process = info['process']
+        if process.poll() is not None:
+            return False, 'Process already finished'
+        
+        try:
+            process.stdin.write(user_input + '\n')
+            process.stdin.flush()
+            return True, None
+        except Exception as e:
+            return False, str(e)
+    
+    def kill_process(self, run_id):
+        """Kill a running process"""
+        with self._lock:
+            info = self.processes.get(run_id)
+        
+        if info is None:
+            return
+        
+        try:
+            info['process'].kill()
+        except:
+            pass
+        self._cleanup_process(run_id)
+    
+    def _cleanup_process(self, run_id):
+        """Clean up a finished process"""
+        with self._lock:
+            info = self.processes.pop(run_id, None)
+        
+        if info:
+            try:
+                info['process'].kill()
+            except:
+                pass
+            try:
+                shutil.rmtree(info['temp_dir'], ignore_errors=True)
+            except:
+                pass
+    
+    def _cleanup_loop(self):
+        """Periodically clean up stale processes (>60 seconds)"""
+        while True:
+            time.sleep(10)
+            stale = []
+            with self._lock:
+                for run_id, info in self.processes.items():
+                    if time.time() - info['started_at'] > 60:
+                        stale.append(run_id)
+            for run_id in stale:
+                self.kill_process(run_id)
+    
+    def _get_command(self, language, file_path, temp_dir):
+        """Get the run command for a language"""
+        commands = {
+            'python': [sys.executable, '-u', file_path],
+            'javascript': ['node', file_path],
+            'java': ['java', '-cp', temp_dir, 'Main'],
+            'cpp': [os.path.join(temp_dir, 'a.exe' if os.name == 'nt' else './a.out')],
+            'c': [os.path.join(temp_dir, 'a.exe' if os.name == 'nt' else './a.out')],
+            'go': ['go', 'run', file_path],
+            'rust': [os.path.join(temp_dir, 'main.exe' if os.name == 'nt' else './main')],
+            'php': ['php', file_path],
+        }
+        return commands.get(language)
+    
+    def _get_compile_command(self, language, file_path, temp_dir):
+        """Get compile command (for compiled languages only)"""
+        if language == 'java':
+            return ['javac', file_path]
+        elif language == 'cpp':
+            return ['g++', file_path, '-o', os.path.join(temp_dir, 'a.exe' if os.name == 'nt' else 'a.out')]
+        elif language == 'c':
+            return ['gcc', file_path, '-o', os.path.join(temp_dir, 'a.exe' if os.name == 'nt' else 'a.out')]
+        elif language == 'rust':
+            return ['rustc', file_path, '-o', os.path.join(temp_dir, 'main.exe' if os.name == 'nt' else 'main')]
+        return None
+
+
+# Global process manager
+process_manager = ProcessManager()
 
 @app.route('/')
 def serve_frontend():
@@ -109,6 +378,78 @@ def reset_interpreter():
         'success': True,
         'message': 'Interpreter reset successfully'
     })
+
+# ═══════════════════════════════════════════════════════════════
+# INTERACTIVE EXECUTION ENDPOINTS
+# ═══════════════════════════════════════════════════════════════
+
+@app.route('/api/run/start', methods=['POST'])
+def run_start():
+    """Start interactive code execution"""
+    try:
+        data = request.get_json()
+        code = data.get('code', '')
+        language = data.get('language', 'python')
+        
+        if not code.strip():
+            return jsonify({'success': False, 'error': 'No code provided'})
+        
+        # Handle non-executable languages
+        if language in ('html', 'css', 'sql'):
+            return jsonify({'success': False, 'error': f'{language.upper()} cannot be executed interactively'})
+        
+        run_id, error = process_manager.start_process(code, language)
+        
+        if error:
+            return jsonify({'success': False, 'error': error})
+        
+        return jsonify({'success': True, 'run_id': run_id})
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/run/<run_id>/output', methods=['GET'])
+def run_output(run_id):
+    """Poll for process output"""
+    output, error, status = process_manager.get_output(run_id)
+    
+    if status == 'not_found':
+        return jsonify({'success': False, 'error': 'Process not found'})
+    
+    result = {
+        'success': True,
+        'output': output or '',
+        'error': error or '',
+        'status': status  # 'running', 'waiting_for_input', 'done'
+    }
+    
+    # Auto-cleanup finished processes after returning final output
+    if status == 'done':
+        threading.Thread(
+            target=lambda: (time.sleep(2), process_manager._cleanup_process(run_id)),
+            daemon=True
+        ).start()
+    
+    return jsonify(result)
+
+@app.route('/api/run/<run_id>/input', methods=['POST'])
+def run_input(run_id):
+    """Send input to a running process"""
+    data = request.get_json()
+    user_input = data.get('input', '')
+    
+    success, error = process_manager.send_input(run_id, user_input)
+    
+    if not success:
+        return jsonify({'success': False, 'error': error})
+    
+    return jsonify({'success': True})
+
+@app.route('/api/run/<run_id>/stop', methods=['POST'])
+def run_stop(run_id):
+    """Stop a running process"""
+    process_manager.kill_process(run_id)
+    return jsonify({'success': True})
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
