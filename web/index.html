@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Code Compiler & IDE - CodeGenix | Python, C, C++, Java, JavaScript & More</title>
+    <meta name="description"
+        content="CodeGenix - Free online code compiler and IDE. Write, compile and run code in Python, C, C++, Java, JavaScript, PHP, Go, Rust, HTML, CSS and more. Includes AI assistant, YouTube tutorials, and multi-file project support.">
+    <meta name="keywords"
+        content="online compiler, code compiler, codegenix, python compiler, c compiler, c++ compiler, java compiler, javascript compiler, php compiler, go compiler, rust compiler, online IDE, code editor, run code online, programming, coding">
+    <meta name="author" content="CodeGenix">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CodeGenix - Online Code Compiler & IDE">
+    <meta property="og:description"
+        content="Free online compiler for Python, C, C++, Java, JavaScript, PHP, Go, Rust and more. AI-powered coding assistant with integrated tutorials.">
+    <meta property="og:site_name" content="CodeGenix">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/assets/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/ayu-dark.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/nord.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/neat.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/idea.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-light.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/swift/swift.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                <span>CodeGenix</span>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <button class="nav-btn" onclick="newFile()">
+                <i class="fas fa-file"></i>
+                <span>New</span>
+            </button>
+            <button class="nav-btn" onclick="openFile()">
+                <i class="fas fa-folder-open"></i>
+                <span>Open</span>
+            </button>
+            <button class="nav-btn" onclick="saveFile()">
+                <i class="fas fa-save"></i>
+                <span>Save</span>
+            </button>
+            <button class="nav-btn" onclick="runCode()">
+                <i class="fas fa-play"></i>
+                <span>Run</span>
+            </button>
+            <button class="nav-btn" onclick="shareCode()">
+                <i class="fas fa-share"></i>
+                <span>Share</span>
+            </button>
+            <button class="nav-btn" onclick="toggleSettings()">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+            <button class="nav-btn" onclick="toggleFindReplace()">
+                <i class="fas fa-search"></i>
+                <span>Find/Replace</span>
+            </button>
+        </div>
+
+        <div class="nav-right">
+            <div class="language-dropdown">
+                <select id="languageSelect" onchange="changeLanguage()">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="php">PHP</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                </select>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle" onchange="toggleTheme()" />
+                <span class="slider">
+                    <div class="moons-hole">
+                        <div class="moon-hole"></div>
+                        <div class="moon-hole"></div>
+                        <div class="moon-hole"></div>
+                    </div>
+                    <div class="black-clouds">
+                        <div class="black-cloud"></div>
+                        <div class="black-cloud"></div>
+                        <div class="black-cloud"></div>
+                    </div>
+                    <div class="clouds">
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                        <div class="cloud"></div>
+                    </div>
+                    <div class="stars">
+                        <svg class="star" viewBox="0 0 20 20">
+                            <path
+                                d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                            </path>
+                        </svg>
+                        <svg class="star" viewBox="0 0 20 20">
+                            <path
+                                d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                            </path>
+                        </svg>
+                        <svg class="star" viewBox="0 0 20 20">
+                            <path
+                                d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                            </path>
+                        </svg>
+                        <svg class="star" viewBox="0 0 20 20">
+                            <path
+                                d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                            </path>
+                        </svg>
+                        <svg class="star" viewBox="0 0 20 20">
+                            <path
+                                d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                            </path>
+                        </svg>
+                    </div>
+                </span>
+            </label>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - Code Editor (50%) -->
+        <div class="left-panel">
+            <div class="editor-header">
+                <div class="file-tabs-belt">
+                    <button class="belt-nav-btn belt-nav-left" onclick="scrollTabsBelt('left')" id="scrollLeft">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="file-tabs-container">
+                        <div class="file-tabs" id="fileTabs">
+                            <div class="tab active" id="tab-0" data-file-id="0">
+                                <span class="tab-name" ondblclick="renameFile(0)">main.py</span>
+                                <i class="fas fa-times tab-close" onclick="closeTab(0)"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="belt-nav-btn belt-nav-right" onclick="scrollTabsBelt('right')" id="scrollRight">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="add-file-btn" onclick="addNewFile()" title="Add new file">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="editor-controls">
+                    <button class="nav-btn" onclick="formatCode()">
+                        <i class="fas fa-magic"></i>
+                        <span>Format</span>
+                    </button>
+                </div>
+            </div>
+            <div class="editor-container">
+                <textarea id="codeEditor"></textarea>
+            </div>
+        </div>
+
+        <!-- Right Panel (50%) -->
+        <div class="right-panel">
+            <!-- Top Half - YouTube Learning Section -->
+            <div class="youtube-section">
+                <div class="youtube-header">
+                    <h3><i class="fab fa-youtube"></i> Learn & Practice</h3>
+                    <div class="youtube-controls">
+                        <input type="text" id="youtubeSearch" placeholder="Paste YouTube URL or search tutorials...">
+                        <button class="nav-btn btn-youtube" onclick="searchYoutube()">
+                            <i class="fas fa-search"></i>
+                            <span>Search</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="youtube-container" id="youtubePlayer">
+                    <iframe id="youtubeFrame" src="https://www.youtube.com/embed/zOjov-2OZ0E" frameborder="0"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <!-- Search Results Container (hidden by default) -->
+                <div class="youtube-search-results" id="youtubeSearchResults" style="display: none;">
+                    <div class="search-results-header">
+                        <span id="searchResultsTitle">Search Results</span>
+                        <button class="nav-btn" onclick="hideSearchResults()">
+                            <i class="fas fa-times"></i>
+                            <span>Close</span>
+                        </button>
+                    </div>
+                    <div class="video-grid" id="videoGrid">
+                        <!-- Video cards will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Half - Input/Output Section -->
+            <div class="io-section">
+                <div class="io-header">
+                    <div class="io-tabs">
+                        <button class="io-tab active" onclick="switchIOTab('output')">
+                            <i class="fas fa-terminal"></i>
+                            Output
+                        </button>
+                        <button class="io-tab" onclick="switchIOTab('input')">
+                            <i class="fas fa-keyboard"></i>
+                            Input
+                        </button>
+                        <button class="io-tab" onclick="switchIOTab('console')">
+                            <i class="fas fa-code"></i>
+                            Console
+                        </button>
+                    </div>
+                    <div class="io-controls">
+                        <button class="nav-btn" onclick="clearOutput()">
+                            <i class="fas fa-trash"></i>
+                            <span>Clear</span>
+                        </button>
+                        <button class="nav-btn" onclick="downloadOutput()">
+                            <i class="fas fa-download"></i>
+                            <span>Download</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="io-content">
+                    <div id="outputPanel" class="io-panel active">
+                        <div id="outputContent">
+                            <div class="output-placeholder">
+                                <i class="fas fa-play-circle"></i>
+                                <p>Click "Run" to execute your code</p>
+                                <p>Output will appear here...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="inputPanel" class="io-panel">
+                        <textarea id="inputArea" placeholder="Enter input for your program here..."></textarea>
+                    </div>
+
+                    <div id="consolePanel" class="io-panel">
+                        <div id="consoleContent"></div>
+                        <div class="console-input">
+                            <span class="console-prompt">>>> </span>
+                            <input type="text" id="consoleInput" placeholder="Enter command...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Assistant -->
+    <div class="ai-assistant" id="aiAssistant">
+        <div class="ai-toggle" onclick="toggleAI()">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="ai-panel" id="aiPanel">
+            <!-- Header -->
+            <div class="ai-panel-header">
+                <h2>AI Assistant</h2>
+                <div class="ai-panel-controls">
+                    <span class="ai-status-badge">Online</span>
+                    <button onclick="minimizeAI()" class="ai-control-btn" title="Minimize">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button onclick="closeAI()" class="ai-control-btn" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Display -->
+            <div class="ai-chat-display" id="chatDisplay">
+                <div class="ai-message ai-message-bot">
+                    Hello! I'm your AI coding assistant. I can help you with code analysis, debugging, and optimization.
+                    Try asking me about your code!
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="ai-input-area">
+                <div class="ai-input-row">
+                    <input type="text" id="aiQuery" placeholder="Ask me about your code..."
+                        onkeypress="handleAIInput(event)" class="ai-input-field" />
+                    <button onclick="askAI()" class="ai-send-btn" id="sendButton">
+                        Send
+                    </button>
+                </div>
+                <div class="ai-quick-actions">
+                    <button class="ai-action-btn ai-action-help" onclick="getCodeHelp()">
+                        Help
+                    </button>
+                    <button class="ai-action-btn ai-action-optimize" onclick="optimizeCode()">
+                        Optimize
+                    </button>
+                    <button class="ai-action-btn ai-action-explain" onclick="explainCode()">
+                        Explain
+                    </button>
+                    <button id="revertCodeBtn" onclick="revertCode()" class="ai-action-btn ai-action-revert"
+                        style="display: none;" title="Revert to previous code">
+                        <i class="fas fa-undo"></i> Revert
+                    </button>
+                    <button onclick="clearChat()" class="ai-action-btn ai-action-clear">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <div class="ai-autopilot-toggle">
+                        <label class="ai-autopilot-label">Autopilot:</label>
+                        <label class="switch-small">
+                            <input type="checkbox" id="autopilotToggle" onchange="toggleAutopilot()" />
+                            <span class="slider-small"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button onclick="toggleSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <button class="settings-tab active" onclick="switchSettingsTab('editor')">
+                    <i class="fas fa-code"></i> Editor
+                </button>
+                <button class="settings-tab" onclick="switchSettingsTab('appearance')">
+                    <i class="fas fa-palette"></i> Appearance
+                </button>
+                <button class="settings-tab" onclick="switchSettingsTab('about')">
+                    <i class="fas fa-info-circle"></i> About
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Editor Settings Tab -->
+                <div class="settings-panel active" id="editorSettings">
+                    <div class="setting-group">
+                        <label>Font Family</label>
+                        <select id="fontFamilySelect" onchange="applyEditorSettings()">
+                            <option value="'Fira Code', monospace">Fira Code</option>
+                            <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                            <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                            <option value="'Consolas', monospace" selected>Consolas</option>
+                            <option value="'Monaco', monospace">Monaco</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Font Size</label>
+                        <select id="fontSizeSelect" onchange="applyEditorSettings()">
+                            <option value="12">12px</option>
+                            <option value="14" selected>14px</option>
+                            <option value="16">16px</option>
+                            <option value="18">18px</option>
+                            <option value="20">20px</option>
+                            <option value="22">22px</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Tab Size</label>
+                        <select id="tabSizeSelect" onchange="applyEditorSettings()">
+                            <option value="2">2 spaces</option>
+                            <option value="4" selected>4 spaces</option>
+                            <option value="8">8 spaces</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="lineNumbersToggle" checked onchange="applyEditorSettings()">
+                            Show Line Numbers
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="wordWrapToggle" checked onchange="applyEditorSettings()">
+                            Word Wrap
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoSave" checked>
+                            Auto-save code
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="aiEnabled" checked>
+                            Enable AI assistance
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Appearance Settings Tab -->
+                <div class="settings-panel" id="appearanceSettings">
+                    <div class="setting-group">
+                        <label>Editor Color Theme</label>
+                        <select id="editorThemeSelect" onchange="applyEditorTheme()">
+                            <optgroup label="Dark Themes">
+                                <option value="monokai" selected>Monokai (Default Dark)</option>
+                                <option value="dracula">Dracula</option>
+                                <option value="material-darker">Material Darker</option>
+                                <option value="ayu-dark">Ayu Dark</option>
+                                <option value="nord">Nord</option>
+                            </optgroup>
+                            <optgroup label="Light Themes">
+                                <option value="default">Default Light</option>
+                                <option value="eclipse">Eclipse</option>
+                                <option value="neat">Neat</option>
+                                <option value="idea">IntelliJ IDEA</option>
+                                <option value="xq-light">XQ Light</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>UI Theme</label>
+                        <div class="theme-preview-container">
+                            <div class="theme-option" onclick="setUITheme('dark')">
+                                <div class="theme-preview dark-preview"></div>
+                                <span>Dark</span>
+                            </div>
+                            <div class="theme-option" onclick="setUITheme('light')">
+                                <div class="theme-preview light-preview"></div>
+                                <span>Light</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="matchBracketsToggle" checked onchange="applyEditorSettings()">
+                            Highlight Matching Brackets
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="activeLineToggle" checked onchange="applyEditorSettings()">
+                            Highlight Active Line
+                        </label>
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div class="settings-panel" id="aboutSettings">
+                    <div class="about-section">
+                        <div class="about-logo">
+                            <i class="fas fa-code"></i>
+                            <h2>CodeGenix</h2>
+                        </div>
+                        <p class="about-version">Version 2.0.0</p>
+                        <p class="about-description">
+                            A powerful, multi-language code compiler and IDE with AI assistance,
+                            integrated YouTube tutorials, and a modern development environment.
+                        </p>
+                        <div class="about-features">
+                            <h4>Features</h4>
+                            <ul>
+                                <li><i class="fas fa-check"></i> Multi-language support (Python, JS, Java, C++, etc.)
+                                </li>
+                                <li><i class="fas fa-check"></i> AI-powered code assistant</li>
+                                <li><i class="fas fa-check"></i> Integrated YouTube tutorials</li>
+                                <li><i class="fas fa-check"></i> Dark & Light themes</li>
+                                <li><i class="fas fa-check"></i> Multi-file project support</li>
+                                <li><i class="fas fa-check"></i> Real-time code execution</li>
+                            </ul>
+                        </div>
+                        <div class="about-credits">
+                            <p>Built using Flask, CodeMirror, and modern web technologies.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="nav-btn" onclick="resetSettings()">
+                    <i class="fas fa-undo"></i> <span>Reset to Defaults</span>
+                </button>
+                <button class="nav-btn btn-success" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> <span>Save Settings</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Find & Replace Modal -->
+    <div class="modal" id="findReplaceModal">
+        <div class="modal-content find-replace-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-search"></i> Find & Replace</h3>
+                <button onclick="toggleFindReplace()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="find-replace-row">
+                    <label>Find:</label>
+                    <div class="find-input-container">
+                        <input type="text" id="findInput" placeholder="Search text..." onkeyup="handleFindKeyup(event)">
+                        <span class="match-count" id="matchCount"></span>
+                    </div>
+                </div>
+                <div class="find-replace-row">
+                    <label>Replace:</label>
+                    <input type="text" id="replaceInput" placeholder="Replace with...">
+                </div>
+                <div class="find-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="caseSensitive">
+                        Case sensitive
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="wholeWord">
+                        Whole word
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="useRegex">
+                        Use regex
+                    </label>
+                </div>
+                <div class="find-actions">
+                    <button class="nav-btn" onclick="findPrevious()">
+                        <i class="fas fa-chevron-up"></i> <span>Previous</span>
+                    </button>
+                    <button class="nav-btn" onclick="findNext()">
+                        <i class="fas fa-chevron-down"></i> <span>Next</span>
+                    </button>
+                    <button class="nav-btn" onclick="replaceOne()">
+                        <i class="fas fa-exchange-alt"></i> <span>Replace</span>
+                    </button>
+                    <button class="nav-btn btn-purple" onclick="replaceAll()">
+                        <i class="fas fa-sync"></i> <span>Replace All</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="/static/pyverse.js?v=8.0"></script>
+</body>
+
+</html>
