@@ -820,6 +820,7 @@ function initializeCodeEditor() {
         lineWrapping: true,
         autoCloseBrackets: true,
         matchBrackets: true,
+        styleActiveLine: true,
         foldGutter: true,
         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
@@ -1251,6 +1252,11 @@ async function runCode() {
 
         currentRunId = result.run_id;
         isRunning = true;
+
+        // Show install info if packages were auto-installed
+        if (result.install_info) {
+            appendOutput('📦 Auto-installing packages...\n' + result.install_info + '\n\n');
+        }
 
         // Start polling for output
         startOutputPolling();
@@ -4644,13 +4650,27 @@ function switchSettingsTab(tabName) {
 function applyEditorSettings() {
     if (!editor) return;
 
-    // Font Family
+    // Font Family — inject CSS to override CodeMirror's defaults
     const fontFamily = document.getElementById('fontFamilySelect').value;
-    editor.getWrapperElement().style.fontFamily = fontFamily;
-
-    // Font Size
     const fontSize = document.getElementById('fontSizeSelect').value;
-    editor.getWrapperElement().style.fontSize = fontSize + 'px';
+
+    // Remove old style tag if exists
+    let styleTag = document.getElementById('editor-custom-font');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'editor-custom-font';
+        document.head.appendChild(styleTag);
+    }
+    styleTag.textContent = `
+        .CodeMirror, .CodeMirror pre, .CodeMirror-code,
+        .CodeMirror-line, .CodeMirror-line span {
+            font-family: ${fontFamily} !important;
+            font-size: ${fontSize}px !important;
+        }
+        .CodeMirror-gutters {
+            font-size: ${fontSize}px !important;
+        }
+    `;
 
     // Tab Size
     const tabSize = parseInt(document.getElementById('tabSizeSelect').value);

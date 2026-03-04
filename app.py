@@ -58,11 +58,16 @@ class ProcessManager:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(code)
         
+        # Auto-install missing Python packages before running
+        install_output = ''
+        if language == 'python':
+            install_output = self._auto_install_python_packages(code)
+        
         # Build command based on language
         cmd = self._get_command(language, file_path, temp_dir)
         if cmd is None:
             shutil.rmtree(temp_dir, ignore_errors=True)
-            return None, f"Language '{language}' not supported for interactive mode"
+            return None, f"Language '{language}' not supported for interactive mode", ''
         
         try:
             # For compiled languages, compile first
@@ -74,7 +79,7 @@ class ProcessManager:
                 )
                 if compile_result.returncode != 0:
                     shutil.rmtree(temp_dir, ignore_errors=True)
-                    return None, f"Compilation Error:\n{compile_result.stderr}"
+                    return None, f"Compilation Error:\n{compile_result.stderr}", ''
             
             # Start the process
             process = subprocess.Popen(
@@ -128,11 +133,11 @@ class ProcessManager:
                     'language': language
                 }
             
-            return run_id, None
+            return run_id, None, install_output
             
         except Exception as e:
             shutil.rmtree(temp_dir, ignore_errors=True)
-            return None, str(e)
+            return None, str(e), ''
     
     def get_output(self, run_id):
         """Get any new output from the process"""
@@ -281,6 +286,109 @@ class ProcessManager:
         elif language == 'rust':
             return ['rustc', file_path, '-o', os.path.join(temp_dir, 'main.exe' if os.name == 'nt' else 'main')]
         return None
+    
+    # Map of commonly imported module names to their PyPI package names
+    IMPORT_TO_PACKAGE = {
+        'cv2': 'opencv-python', 'PIL': 'Pillow', 'sklearn': 'scikit-learn',
+        'skimage': 'scikit-image', 'yaml': 'pyyaml', 'bs4': 'beautifulsoup4',
+        'dotenv': 'python-dotenv', 'telegram': 'python-telegram-bot',
+        'discord': 'discord.py', 'gi': 'PyGObject', 'wx': 'wxPython',
+        'attr': 'attrs', 'dateutil': 'python-dateutil', 'jwt': 'PyJWT',
+        'serial': 'pyserial', 'usb': 'pyusb', 'Bio': 'biopython',
+        'Crypto': 'pycryptodome', 'google': 'google-api-python-client',
+        'docx': 'python-docx', 'pptx': 'python-pptx', 'openpyxl': 'openpyxl',
+        'xls': 'xlrd', 'fitz': 'pymupdf', 'lxml': 'lxml', 'pygame': 'pygame',
+        'flask': 'flask', 'django': 'django', 'fastapi': 'fastapi',
+        'numpy': 'numpy', 'pandas': 'pandas', 'matplotlib': 'matplotlib',
+        'scipy': 'scipy', 'seaborn': 'seaborn', 'plotly': 'plotly',
+        'requests': 'requests', 'httpx': 'httpx', 'aiohttp': 'aiohttp',
+        'pydantic': 'pydantic', 'sqlalchemy': 'sqlalchemy', 'pymongo': 'pymongo',
+        'redis': 'redis', 'celery': 'celery', 'scrapy': 'scrapy',
+        'colorama': 'colorama', 'tqdm': 'tqdm', 'rich': 'rich',
+        'click': 'click', 'typer': 'typer', 'tabulate': 'tabulate',
+        'arrow': 'arrow', 'pendulum': 'pendulum',
+        'cryptography': 'cryptography', 'bcrypt': 'bcrypt',
+        'paramiko': 'paramiko', 'fabric': 'fabric',
+        'psutil': 'psutil', 'pyautogui': 'pyautogui',
+        'pyttsx3': 'pyttsx3', 'gtts': 'gTTS',
+        'speech_recognition': 'SpeechRecognition',
+        'transformers': 'transformers', 'torch': 'torch',
+        'tensorflow': 'tensorflow', 'keras': 'keras',
+        'sympy': 'sympy', 'networkx': 'networkx',
+        'pillow': 'Pillow', 'tk': 'tk',
+    }
+    
+    def _auto_install_python_packages(self, code):
+        """Parse Python code for imports and auto-install missing packages"""
+        import re
+        import importlib
+        
+        # Extract module names from import statements
+        modules = set()
+        
+        # Match: import xyz, import xyz.abc, from xyz import abc
+        for match in re.finditer(r'^\s*import\s+(\S+)', code, re.MULTILINE):
+            mod = match.group(1).split('.')[0].split(',')[0].strip()
+            modules.add(mod)
+        
+        for match in re.finditer(r'^\s*from\s+(\S+)\s+import', code, re.MULTILINE):
+            mod = match.group(1).split('.')[0].strip()
+            modules.add(mod)
+        
+        # Filter out standard library modules
+        stdlib = {
+            'os', 'sys', 'math', 'random', 'time', 'datetime', 'json', 'csv',
+            're', 'collections', 'itertools', 'functools', 'operator', 'string',
+            'io', 'pathlib', 'glob', 'shutil', 'tempfile', 'subprocess',
+            'threading', 'multiprocessing', 'asyncio', 'concurrent',
+            'socket', 'http', 'urllib', 'email', 'html', 'xml', 'logging',
+            'unittest', 'doctest', 'pdb', 'profile', 'timeit', 'trace',
+            'gc', 'inspect', 'dis', 'abc', 'contextlib', 'typing',
+            'dataclasses', 'enum', 'copy', 'pprint', 'textwrap',
+            'struct', 'codecs', 'base64', 'hashlib', 'hmac', 'secrets',
+            'argparse', 'getopt', 'configparser', 'fileinput',
+            'sqlite3', 'dbm', 'shelve', 'pickle', 'marshal',
+            'zlib', 'gzip', 'bz2', 'lzma', 'zipfile', 'tarfile',
+            'decimal', 'fractions', 'statistics', 'cmath',
+            'array', 'queue', 'heapq', 'bisect',
+            'tkinter', 'turtle', 'ctypes', 'platform', 'signal',
+            'webbrowser', 'uuid', 'getpass', 'locale', 'calendar',
+            '__future__', 'builtins', 'types', 'warnings', 'traceback',
+        }
+        
+        to_install = []
+        for mod in modules:
+            if mod in stdlib or mod.startswith('_'):
+                continue
+            # Check if already installed
+            try:
+                importlib.import_module(mod)
+            except ImportError:
+                # Map to PyPI package name
+                package = self.IMPORT_TO_PACKAGE.get(mod, mod)
+                to_install.append(package)
+        
+        if not to_install:
+            return ''
+        
+        # Install missing packages
+        results = []
+        for package in to_install:
+            try:
+                result = subprocess.run(
+                    [sys.executable, '-m', 'pip', 'install', package, '--quiet'],
+                    capture_output=True, text=True, timeout=60
+                )
+                if result.returncode == 0:
+                    results.append(f"✅ Installed {package}")
+                else:
+                    results.append(f"⚠️ Failed to install {package}: {result.stderr.strip()}")
+            except subprocess.TimeoutExpired:
+                results.append(f"⚠️ Timeout installing {package}")
+            except Exception as e:
+                results.append(f"⚠️ Error installing {package}: {str(e)}")
+        
+        return '\n'.join(results)
 
 
 # Global process manager
@@ -398,12 +506,12 @@ def run_start():
         if language in ('html', 'css', 'sql'):
             return jsonify({'success': False, 'error': f'{language.upper()} cannot be executed interactively'})
         
-        run_id, error = process_manager.start_process(code, language)
+        run_id, error, install_info = process_manager.start_process(code, language)
         
         if error:
             return jsonify({'success': False, 'error': error})
         
-        return jsonify({'success': True, 'run_id': run_id})
+        return jsonify({'success': True, 'run_id': run_id, 'install_info': install_info or ''})
     
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
