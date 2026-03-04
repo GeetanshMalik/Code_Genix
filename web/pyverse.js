@@ -1191,12 +1191,6 @@ function changeLanguage() {
     }
 }
 
-// Tab management
-function closeTab(fileId) {
-    // This function is now handled by the new file management system
-    // The actual implementation is in the closeTab function above
-}
-
 // Code execution
 async function runCode() {
     // Save current file content
