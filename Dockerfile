@@ -26,10 +26,11 @@ RUN apt-get update && apt-get install -y \
     make \
     # Java Development Kit
     default-jdk \
-    # Node.js (JavaScript)
-    nodejs \
-    npm \
+    # Node.js (JavaScript) - Use NodeSource for modern version
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     # Additional languages
+    && apt-get install -y \
     php \
     golang-go \
     rustc \
