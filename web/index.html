@@ -23,6 +23,9 @@
         type="image/svg+xml">
     <link rel="stylesheet" href="/static/assets/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Source+Code+Pro:wght@400;500&family=Ubuntu+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Inconsolata:wght@400;500&family=Space+Mono:wght@400;700&family=Roboto+Mono:wght@400;500&family=Anonymous+Pro:wght@400;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
@@ -392,12 +395,30 @@
                     <div class="setting-group">
                         <label>Font Family</label>
                         <select id="fontFamilySelect" onchange="applyEditorSettings()">
-                            <option value="'Fira Code', monospace">Fira Code</option>
-                            <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-                            <option value="'Source Code Pro', monospace">Source Code Pro</option>
-                            <option value="'Consolas', monospace" selected>Consolas</option>
-                            <option value="'Monaco', monospace">Monaco</option>
-                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="'Fira Code', monospace" style="font-family:'Fira Code',monospace">Fira Code
+                            </option>
+                            <option value="'JetBrains Mono', monospace" style="font-family:'JetBrains Mono',monospace">
+                                JetBrains Mono</option>
+                            <option value="'Source Code Pro', monospace"
+                                style="font-family:'Source Code Pro',monospace">Source Code Pro</option>
+                            <option value="'Roboto Mono', monospace" style="font-family:'Roboto Mono',monospace">Roboto
+                                Mono</option>
+                            <option value="'Ubuntu Mono', monospace" style="font-family:'Ubuntu Mono',monospace">Ubuntu
+                                Mono</option>
+                            <option value="'IBM Plex Mono', monospace" style="font-family:'IBM Plex Mono',monospace">IBM
+                                Plex Mono</option>
+                            <option value="'Inconsolata', monospace" style="font-family:'Inconsolata',monospace">
+                                Inconsolata</option>
+                            <option value="'Space Mono', monospace" style="font-family:'Space Mono',monospace">Space
+                                Mono</option>
+                            <option value="'DM Mono', monospace" style="font-family:'DM Mono',monospace">DM Mono
+                            </option>
+                            <option value="'Anonymous Pro', monospace" style="font-family:'Anonymous Pro',monospace">
+                                Anonymous Pro</option>
+                            <option value="'Consolas', monospace" selected style="font-family:'Consolas',monospace">
+                                Consolas</option>
+                            <option value="'Courier New', monospace" style="font-family:'Courier New',monospace">Courier
+                                New</option>
                         </select>
                     </div>
                     <div class="setting-group">
